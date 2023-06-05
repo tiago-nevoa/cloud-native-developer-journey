@@ -12,5 +12,4 @@ import java.util.List;
 public interface DeveloperEvent {
 
 	public String codeTogether(List<CodeCreator> codeCreators);
-
 }
