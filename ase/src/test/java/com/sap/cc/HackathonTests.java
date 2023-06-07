@@ -134,7 +134,5 @@ class HackathonTests {
 			NoSuchMethodException, SecurityException {
 
 		return developerConstructor.newInstance(name, language);
-
 	}
-
 }
