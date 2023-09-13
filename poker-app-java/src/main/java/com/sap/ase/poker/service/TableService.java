@@ -1,4 +1,5 @@
 package com.sap.ase.poker.service;
+
 import com.sap.ase.poker.model.GameState;
 import com.sap.ase.poker.model.IllegalActionException;
 import com.sap.ase.poker.model.IllegalAmountException;
@@ -174,18 +175,18 @@ public class TableService {
         }
     }
 
-    private void handleCallAction() throws IllegalActionException{
+    private void handleCallAction() throws IllegalActionException {
         validateCall();
-        if (currentPlayer.getBet() < currentBet) {
-            currentPlayer.bet(currentBet - currentPlayer.getBet());
-            setBets(currentPlayer.getId());
-        }
+        currentPlayer.bet(currentBet - currentPlayer.getBet());
+        setBets(currentPlayer.getId());
     }
-    private void validateCall() throws IllegalActionException{
-        if (currentPlayer.getBet() >= currentBet){
+
+    private void validateCall() throws IllegalActionException {
+        if (currentPlayer.getBet() >= currentBet) {
             throw new IllegalActionException("Current bet is lower or equal than the player bet, Illegal Check " + currentPlayer.getId());
         }
     }
+
     private void setNextPlayer() {
         int currentIndex = players.indexOf(currentPlayer);
         int nextIndex = (currentIndex + 1) % players.size();
@@ -214,7 +215,8 @@ public class TableService {
         players.forEach(Player::clearBet);
         bets.clear();
     }
-    private void endGame(){
+
+    private void endGame() {
         currentBet = 0;
         gameState = GameState.ENDED;
     }

@@ -56,6 +56,16 @@ class TableServiceTest {
     }
 
     @Test
+    void tableService_startWith1Player_shouldKeepOpen() {
+        String playerId = "i-ducati";
+        String playerName = "Ducati Opera";
+        tableService.addPlayer(playerId, playerName);
+
+        tableService.start();
+        assertThat(tableService.getState()).isEqualTo(GameState.OPEN);
+    }
+
+    @Test
     void tableService_start_shouldChangeGameState_toPreFlop() {
         String playerId1 = "i-ducati";
         String playerName1 = "Ducati Opera";
@@ -153,6 +163,17 @@ class TableServiceTest {
         tableService.performAction("check", 0);
         tableService.performAction("check", 0);
         assertThat(tableService.getCommunityCards()).hasSize(3);
+    }
+
+    @Test
+    void tableService_performActionGameOpen_shouldKeepOpen() {
+        String playerId = "i-ducati";
+        String playerName = "Ducati Opera";
+        tableService.addPlayer(playerId, playerName);
+
+        tableService.start();
+        tableService.performAction("any", 42);
+        assertThat(tableService.getState()).isEqualTo(GameState.OPEN);
     }
 
     @Test
@@ -306,6 +327,7 @@ class TableServiceTest {
         assertThat(tableService.getWinner().get().getId()).isEqualTo(playerId2);
         assertThat(tableService.getState()).isEqualTo(GameState.ENDED);
     }
+
     @Test
     void tableService_performActionCall_shouldThrowIllegalActionException() {
         String playerId1 = "i-ducati";
@@ -323,7 +345,8 @@ class TableServiceTest {
         IllegalActionException exception = assertThrows(IllegalActionException.class, () -> {
             tableService.performAction("call", 42);
         });
-        String expectedMessage = "Current bet is lower or equal than the player bet, Illegal Check " + tableService.getCurrentPlayer().get().getId();
+        String expectedMessage =
+                "Current bet is lower or equal than the player bet, Illegal Check " + tableService.getCurrentPlayer().get().getId();
         assertEquals(expectedMessage, exception.getMessage());
 
     }
