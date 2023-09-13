@@ -1,0 +1,10 @@
+target
+bin
+*.log
+.DS_Store
+thumbs.db
+*.iml
+.settings
+.classpath
+.project
+.idea
