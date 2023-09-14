@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThreeOfAKind.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">poker</a> &gt; <a href="index.source.html" class="el_package">com.sap.ase.poker.model.hands</a> &gt; <span class="el_source">ThreeOfAKind.java</span></div><h1>ThreeOfAKind.java</h1><pre class="source lang-java linenums">package com.sap.ase.poker.model.hands;
+
+import com.sap.ase.poker.model.InvalidHandException;
+import com.sap.ase.poker.model.deck.Card;
+import com.sap.ase.poker.model.deck.Kind;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public class ThreeOfAKind extends Hand {
+
+    public static final int THREE_OF_A_KIND_RANK = 4;
+
+    public ThreeOfAKind(List&lt;Card&gt; cards) {
+<span class="fc" id="L17">        super(cards);</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    public int getRank() {
+<span class="fc" id="L22">        return THREE_OF_A_KIND_RANK;</span>
+    }
+
+    @Override
+    protected List&lt;Card&gt; findRelevantCards(List&lt;Card&gt; cards) {
+<span class="fc" id="L27">        return findThreeOfAKind(cards);</span>
+    }
+
+    @Override
+    protected int compareRelevantCards(Hand hand) {
+<span class="fc" id="L32">        int rank = this.getRelevantCards().get(0).getKind().getRank();</span>
+<span class="fc" id="L33">        int otherRank = hand.getRelevantCards().get(0).getKind().getRank();</span>
+
+<span class="fc" id="L35">        return rank - otherRank;</span>
+    }
+
+    private List&lt;Card&gt; findThreeOfAKind(List&lt;Card&gt; cards) {
+<span class="fc" id="L39">        Map&lt;Kind, List&lt;Card&gt;&gt; kindGroups = cards.stream().collect(Collectors.groupingBy(Card::getKind));</span>
+<span class="fc" id="L40">        Optional&lt;List&lt;Card&gt;&gt; quadruple =</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">                kindGroups.values().stream().filter(group -&gt; group.size() == 3).findFirst();</span>
+
+<span class="fc" id="L43">        return quadruple.orElseThrow(() -&gt; new InvalidHandException(&quot;ThreeOfAKind Not Found&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

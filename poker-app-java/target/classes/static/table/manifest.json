@@ -1,0 +1,62 @@
+{
+  "_version": "1.12.0",
+  "sap.app": {
+    "id": "cc.ase.poker.table",
+    "type": "application"
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": false
+    },
+    "supportedThemes": [
+      "sap_horizon_dark"
+    ],
+    "fullWidth": true
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.100.0",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.m": {},
+        "sap.uxap": {}
+      }
+    },
+    "rootView": {
+      "viewName": "cc.ase.poker.table.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "app"
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "cc.ase.poker.table.i18n.i18n"
+        }
+      },
+      "": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/table.json"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/styles.css"
+        }
+      ]
+    }
+  }
+}
