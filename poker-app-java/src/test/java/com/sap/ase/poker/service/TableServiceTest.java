@@ -423,7 +423,7 @@ class TableServiceTest {
     }
 
     @Test
-    void tableService_endOfRound_shouldUpdatePot() {
+    void tableService_endOfRoundPreFlop_shouldUpdatePot() {
         String playerId1 = "i-ducati";
         String playerName1 = "Ducati Opera";
         String playerId2 = "i-honda";
@@ -453,5 +453,55 @@ class TableServiceTest {
         assertThat(tableService.getPlayers().get(0).getCash()).isEqualTo(25);
         assertThat(tableService.getPlayers().get(1).getCash()).isEqualTo(25);
         assertThat(tableService.getPlayers().get(2).getCash()).isEqualTo(25);
+    }
+
+    @Test
+    void tableService_endOfRoundFlop_shouldUpdateTurn(){
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        tableService.performAction("raise", 25);
+        tableService.performAction("raise", 50);
+        tableService.performAction("raise", 75);
+        tableService.performAction("call", 0);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("check", 0);
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("fold", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("raise", 10);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 5);
+
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("check", 0);
+
+        assertThat(tableService.getState()).isEqualTo(GameState.ENDED);
+        assertThat(tableService.getPot()).isEqualTo(75*3 + 5*2 + 10*2 + 5*2);
+        assertThat(tableService.getBets()).isEmpty();
+        assertThat(tableService.getPlayers().get(0).getBet()).isZero();
+        assertThat(tableService.getPlayers().get(1).getBet()).isZero();
+        assertThat(tableService.getPlayers().get(2).getBet()).isZero();
+        assertThat(tableService.getPlayers().get(0).getCash()).isEqualTo(25);
+        assertThat(tableService.getPlayers().get(1).getCash()).isEqualTo(5);
+        assertThat(tableService.getPlayers().get(2).getCash()).isEqualTo(5);
     }
 }

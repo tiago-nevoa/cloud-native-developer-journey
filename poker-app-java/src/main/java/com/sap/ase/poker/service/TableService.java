@@ -20,8 +20,9 @@ public class TableService {
 
     private static final int START_CASH = 100;
     private static final int MIN_PLAYERS_TO_START = 2;
-    private static final int NUM_COMMUNITY_CARDS = 5;
     private static final int NUM_FLOP_CARDS = 3;
+    private static final int NUM_TURN_CARDS = 4;
+    private static final int NUM_RIVER_CARDS = 5;
     private final Supplier<Deck> deckSupplier;
     private final List<Player> players = new ArrayList<>();
     private final List<Card> communityCards = new ArrayList<>();
@@ -124,7 +125,7 @@ public class TableService {
         setNextPlayer();
         if (gameState != GameState.ENDED) {
             endOfRound();
-        }
+        }else checkTheresWinner();
     }
 
     private void handleCheckAction() throws IllegalActionException {
@@ -195,17 +196,36 @@ public class TableService {
 
     private void endOfRound() {
         if (players.indexOf(currentPlayer) == 0 && allPlayersHaveEqualBets()) {
-            while (communityCards.size() < NUM_FLOP_CARDS) {
-                communityCards.add(deck.draw());
+            switch (gameState){
+                case PRE_FLOP :
+                    drawCommunityCards(NUM_FLOP_CARDS);
+                    gameState = GameState.FLOP;
+                    break;
+                case FLOP :
+                    drawCommunityCards(NUM_TURN_CARDS);
+                    gameState = GameState.TURN;
+                    break;
+                case TURN :
+                    drawCommunityCards(NUM_RIVER_CARDS);
+                    gameState = GameState.RIVER;
+                    break;
+                case RIVER :
+                    gameState = GameState.ENDED;
+                    break;
             }
-            gameState = GameState.FLOP;
             updatePot();
         }
     }
 
     private boolean allPlayersHaveEqualBets() {
-        int firstPlayerBet = players.get(0).getBet();
-        return players.stream().allMatch(player -> player.getBet() == firstPlayerBet);
+        int firstPlayerBet = players.stream().filter(Player::isActive).findFirst().get().getBet();
+        return players.stream().filter(Player::isActive).allMatch(player -> player.getBet() == firstPlayerBet);
+    }
+
+    private void drawCommunityCards(int numCards) {
+        while (communityCards.size() < numCards) {
+            communityCards.add(deck.draw());
+        }
     }
 
     private void updatePot() {
@@ -214,6 +234,7 @@ public class TableService {
         }
         players.forEach(Player::clearBet);
         bets.clear();
+        currentBet = 0;
     }
 
     private void endGame() {
