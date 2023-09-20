@@ -1,0 +1,120 @@
+<mvc:View xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns:uxap="sap.uxap" xmlns:controls="cc.ase.poker.table.controls" controllerName="cc.ase.poker.table.controller.App" displayBlock="true">
+  <App id="app">
+    <pages>
+      <Page title="{i18n>Title}" floatingFooter="true" enableScrolling="false">
+        <headerContent>
+          <OverflowToolbar>
+            <Button type="Accept" text="{i18n>Start}" visible="{/start/visible}" enabled="{/start/enabled}" press="start" />
+            <ToolbarSpacer />
+            <core:Icon src="sap-icon://person-placeholder" />
+            <Text text="{/player/name}" />
+            <Button icon="sap-icon://log" press="logout" />
+          </OverflowToolbar>
+        </headerContent>
+        <content>
+          <uxap:ObjectPageLayout>
+            <uxap:sections>
+              <uxap:ObjectPageSection title="{i18n>Players}" titleUppercase="false">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <Table items="{/players}" width="auto" class="sapUxAPObjectPageSubSectionAlignContent">
+                      <columns>
+                        <Column>
+                          <Text text="{i18n>Name}" />
+                        </Column>
+                        <Column>
+                          <Text text="{i18n>Cash}" />
+                        </Column>
+                      </columns>
+                      <items>
+                        <ColumnListItem>
+                          <cells>
+                            <ObjectStatus text="{name}" state="{= ${id} === ${/currentPlayer/id} ? 'Information' : 'None' }" />
+                            <ObjectStatus text="{cash}" state="{= ${id} === ${/currentPlayer/id} ? 'Information' : 'None' }" />
+                          </cells>
+                        </ColumnListItem>
+                      </items>
+                    </Table>
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+              <uxap:ObjectPageSection title="{i18n>Bets}" titleUppercase="false">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <Table items="{/bets}" width="auto" class="sapUxAPObjectPageSubSectionAlignContent">
+                      <columns>
+                        <Column>
+                          <Text text="{i18n>Name}" />
+                        </Column>
+                        <Column>
+                          <Text text="{i18n>Bet}" />
+                        </Column>
+                      </columns>
+                      <items>
+                        <ColumnListItem>
+                          <cells>
+                            <Text text="{name}" />
+                            <Text text="{bet}" />
+                          </cells>
+                        </ColumnListItem>
+                      </items>
+                    </Table>
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+              <uxap:ObjectPageSection title="{i18n>Pot}" titleUppercase="false">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <ObjectNumber class="sapMObjectNumberLarge" number="{/pot}" state="Information" />
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+              <uxap:ObjectPageSection title="{i18n>CommunityCards}" titleUppercase="false">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <VBox>
+                      <HBox items="{/communityCards}" class="playingCards">
+                        <controls:Card suit="{suit}" rank="{rank}" />
+                      </HBox>
+                    </VBox>
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+              <uxap:ObjectPageSection title="{i18n>PlayerCards}" titleUppercase="false">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <HBox items="{/playerCards}" class="playingCards">
+                      <controls:Card suit="{suit}" rank="{rank}" />
+                    </HBox>
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+              <uxap:ObjectPageSection title="{i18n>Winner}" titleUppercase="false" visible="{= ${/winner} !== null }">
+                <uxap:subSections>
+                  <uxap:ObjectPageSubSection>
+                    <VBox>
+                      <ObjectStatus class="sapUiSmallMarginBottom" text="{/winner/name}" icon="sap-icon://information" state="Information" />
+                      <HBox items="{/winnerHand}" class="playingCards">
+                        <controls:Card suit="{suit}" rank="{rank}" />
+                      </HBox>
+                    </VBox>
+                  </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+              </uxap:ObjectPageSection>
+            </uxap:sections>
+          </uxap:ObjectPageLayout>
+        </content>
+        <footer>
+          <OverflowToolbar>
+            <Button id="raise" text="{i18n>Raise}" enabled="{/actions/enabled}" press=".action('raise', ${path: '/amount', formatter: 'parseInt'})" type="Attention" />
+            <Input id="amount" enabled="{/actions/enabled}" width="5em" placeholder="{i18n>Amount}" value="{/amount}" />
+            <ToolbarSpacer />
+            <Button id="check" enabled="{/actions/enabled}" text="{i18n>Check}" press=".action('check')" type="Ghost" />
+            <Button id="call" enabled="{/actions/enabled}" text="{i18n>Call}" press=".action('call')" type="Emphasized" />
+            <Button id="fold" enabled="{/actions/enabled}" text="{i18n>Fold}" press=".action('fold')" type="Reject" />
+          </OverflowToolbar>
+        </footer>
+      </Page>
+    </pages>
+  </App>
+</mvc:View>
