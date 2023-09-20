@@ -131,4 +131,5 @@ class ClassesCreatedTests {
 		
 		assertThat(classes.iterator().next().getProtectionDomain().getCodeSource().getLocation().getPath()).withFailMessage("The Hackathon class is in the src/test/java folder, not in src/main/java where it belongs.").contains("target/classes");
 	}
+
 }

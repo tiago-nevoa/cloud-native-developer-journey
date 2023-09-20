@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.sap.ase.poker.smokeTests.GameProgressionSmokeTest
--------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 4, Time elapsed: 0 s - in com.sap.ase.poker.smokeTests.GameProgressionSmokeTest

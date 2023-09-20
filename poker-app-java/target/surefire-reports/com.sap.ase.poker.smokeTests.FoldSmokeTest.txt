@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.sap.ase.poker.smokeTests.FoldSmokeTest
--------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.903 s - in com.sap.ase.poker.smokeTests.FoldSmokeTest

@@ -5,7 +5,12 @@ import com.sap.ase.poker.model.IllegalActionException;
 import com.sap.ase.poker.model.IllegalAmountException;
 import com.sap.ase.poker.model.Player;
 import com.sap.ase.poker.model.deck.Card;
+import com.sap.ase.poker.model.deck.CardShuffler;
 import com.sap.ase.poker.model.deck.Deck;
+import com.sap.ase.poker.model.deck.PokerCardsSupplier;
+import com.sap.ase.poker.model.deck.RandomCardShuffler;
+import com.sap.ase.poker.model.rules.HandRules;
+import com.sap.ase.poker.model.rules.WinnerRules;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,19 +28,20 @@ public class TableService {
     private static final int NUM_FLOP_CARDS = 3;
     private static final int NUM_TURN_CARDS = 4;
     private static final int NUM_RIVER_CARDS = 5;
-    private final Supplier<Deck> deckSupplier;
     private final List<Player> players = new ArrayList<>();
     private final List<Card> communityCards = new ArrayList<>();
     private final Map<String, Integer> bets = new HashMap<>();
-    private Deck deck;
+    private final WinnerRules winnerRules = new WinnerRules(new HandRules());
+    private final Deck deck;
     private GameState gameState = GameState.OPEN;
     private Player currentPlayer;
     private int currentBet = 0;
-    private Player winner;
     private int pot = 0;
 
-    public TableService(Supplier<Deck> deckSupplier) {
-        this.deckSupplier = deckSupplier;
+    public TableService(final Supplier<Deck> deckSupplier) {
+        List<Card> pokerCards = new PokerCardsSupplier().get();
+        CardShuffler cardShuffler = new RandomCardShuffler();
+        this.deck = new Deck(pokerCards, cardShuffler);
     }
 
     public GameState getState() {
@@ -78,11 +84,26 @@ public class TableService {
     }
 
     public Optional<Player> getWinner() {
-        return Optional.ofNullable(winner);
+        if (gameState != GameState.ENDED) {
+            return Optional.empty();
+        }
+
+        final var activePlayers = getActivePlayers();
+        if (activePlayers.size() == 1) {
+            return Optional.of(activePlayers.get(0));
+        }
+
+        final var winners = winnerRules.findWinners(getCommunityCards(), activePlayers);
+        return Optional.of(winners.getWinners().get(0));
     }
 
     public List<Card> getWinnerHand() {
-        return winner.getHandCards();
+        if (getWinner().isEmpty() || getActivePlayers().size() == 1) {
+            return Collections.emptyList();
+        }
+
+        final var winners = winnerRules.findWinners(getCommunityCards(), getActivePlayers());
+        return winners.getWinningHand().get().getCards();
     }
 
     public void start() {
@@ -90,19 +111,17 @@ public class TableService {
         if (players.size() < MIN_PLAYERS_TO_START) {
             return;
         }
-
-        deck = deckSupplier.get();
-        //deck.shuffle();
+        deck.shuffle();
         gameState = GameState.PRE_FLOP;
         players.forEach(player -> player.setHandCards(List.of(deck.draw(), deck.draw())));
         players.forEach(Player::setActive);
         currentPlayer = players.get(0);
-        winner = currentPlayer;
     }
 
     public void addPlayer(String playerId, String playerName) {
         Player player = new Player(playerId, playerName, START_CASH);
         players.add(player);
+        setBets(playerId);
         System.out.printf("Player joined the table: %s%n", playerId);
     }
 
@@ -125,7 +144,10 @@ public class TableService {
         setNextPlayer();
         if (gameState != GameState.ENDED) {
             endOfRound();
-        }else checkTheresWinner();
+        }
+        if (gameState == GameState.ENDED) {
+            checkTheresWinner();
+        }
     }
 
     private void handleCheckAction() throws IllegalActionException {
@@ -168,12 +190,16 @@ public class TableService {
     }
 
     private void checkTheresWinner() {
-        long activePlayerCount = players.stream().filter(Player::isActive).count();
-        if (activePlayerCount == 1) {
-            winner = players.stream().filter(Player::isActive).findFirst().orElse(null);
-            winner.setHandCards(Collections.emptyList());
+        if (getActivePlayers().size() == 1) {
             endGame();
+        } else if (gameState == GameState.ENDED) {
+            winnerReward();
         }
+    }
+
+    private void winnerReward() {
+        getWinner().get().addCash(pot);
+        pot = 0;
     }
 
     private void handleCallAction() throws IllegalActionException {
@@ -194,22 +220,26 @@ public class TableService {
         currentPlayer = players.get(nextIndex);
     }
 
+    private List<Player> getActivePlayers() {
+        return players.stream().filter(Player::isActive).toList();
+    }
+
     private void endOfRound() {
         if (players.indexOf(currentPlayer) == 0 && allPlayersHaveEqualBets()) {
-            switch (gameState){
-                case PRE_FLOP :
+            switch (gameState) {
+                case PRE_FLOP:
                     drawCommunityCards(NUM_FLOP_CARDS);
                     gameState = GameState.FLOP;
                     break;
-                case FLOP :
+                case FLOP:
                     drawCommunityCards(NUM_TURN_CARDS);
                     gameState = GameState.TURN;
                     break;
-                case TURN :
+                case TURN:
                     drawCommunityCards(NUM_RIVER_CARDS);
                     gameState = GameState.RIVER;
                     break;
-                case RIVER :
+                case RIVER:
                     gameState = GameState.ENDED;
                     break;
             }
@@ -218,8 +248,8 @@ public class TableService {
     }
 
     private boolean allPlayersHaveEqualBets() {
-        int firstPlayerBet = players.stream().filter(Player::isActive).findFirst().get().getBet();
-        return players.stream().filter(Player::isActive).allMatch(player -> player.getBet() == firstPlayerBet);
+        int firstPlayerBet = getActivePlayers().get(0).getBet();
+        return getActivePlayers().stream().allMatch(player -> player.getBet() == firstPlayerBet);
     }
 
     private void drawCommunityCards(int numCards) {

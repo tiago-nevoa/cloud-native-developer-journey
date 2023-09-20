@@ -10,4 +10,5 @@ public abstract class CodeCreator {
 //╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝     ╚═════╝ ╚═╝     ╚═╝     ╚═╝╚═╝╚═╝
 
 	public abstract String code() throws UnsupportedDevelopmentLanguageException;
+
 }
