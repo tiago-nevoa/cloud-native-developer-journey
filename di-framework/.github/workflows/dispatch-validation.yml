@@ -1,0 +1,24 @@
+name: Remote Dispatch
+
+on:
+  push:
+    branches:
+      - "[a-zA-Z]?[0-9]*"
+
+jobs:
+  dispatch-to-validation-repo:
+    runs-on: solinas-small
+    steps:
+       ### Parse branch and set user branch in env
+       - name: Parse user branch
+         run: |
+           BRANCH=`echo "$GITHUB_REF" | sed 's/refs\/heads\/*//'`
+           SHORTREPO=`echo "$GITHUB_REPOSITORY" | sed 's/cloud-curriculum\///'`
+           echo "user_branch=$BRANCH" >> $GITHUB_ENV
+           echo "short_repo=$SHORTREPO" >> $GITHUB_ENV
+       - name: Dispatch
+         run: |
+           curl -X POST https://github.tools.sap/api/v3/repos/cloud-curriculum/exercises-tracking-internal/dispatches \
+           -H 'Accept: application/vnd.github+json' \
+           -u ${{ secrets.PAT }} \
+           --data '{"event_type": "dispatch-validation;'${{ env.short_repo }}';'${{ env.user_branch }}'", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'","ref": "'"$GITHUB_REF"'" }}'
