@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TableService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">poker</a> &gt; <a href="index.source.html" class="el_package">com.sap.ase.poker.service</a> &gt; <span class="el_source">TableService.java</span></div><h1>TableService.java</h1><pre class="source lang-java linenums">package com.sap.ase.poker.service;
+
+import com.sap.ase.poker.model.GameState;
+import com.sap.ase.poker.model.IllegalActionException;
+import com.sap.ase.poker.model.IllegalAmountException;
+import com.sap.ase.poker.model.Player;
+import com.sap.ase.poker.model.deck.Card;
+import com.sap.ase.poker.model.deck.Deck;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TableService {
+
+    private static final int START_CASH = 100;
+    private static final int MIN_PLAYERS_TO_START = 2;
+    private static final int NUM_FLOP_CARDS = 3;
+    private static final int NUM_TURN_CARDS = 4;
+    private static final int NUM_RIVER_CARDS = 5;
+    private final Supplier&lt;Deck&gt; deckSupplier;
+<span class="fc" id="L27">    private final List&lt;Player&gt; players = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">    private final List&lt;Card&gt; communityCards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L29">    private final Map&lt;String, Integer&gt; bets = new HashMap&lt;&gt;();</span>
+    private Deck deck;
+<span class="fc" id="L31">    private GameState gameState = GameState.OPEN;</span>
+    private Player currentPlayer;
+<span class="fc" id="L33">    private int currentBet = 0;</span>
+    private Player winner;
+<span class="fc" id="L35">    private int pot = 0;</span>
+
+<span class="fc" id="L37">    public TableService(Supplier&lt;Deck&gt; deckSupplier) {</span>
+<span class="fc" id="L38">        this.deckSupplier = deckSupplier;</span>
+<span class="fc" id="L39">    }</span>
+
+    public GameState getState() {
+<span class="fc" id="L42">        return gameState;</span>
+    }
+
+    public List&lt;Player&gt; getPlayers() {
+<span class="fc" id="L46">        return players;</span>
+    }
+
+    public List&lt;Card&gt; getPlayerCards(String playerId) {
+<span class="fc" id="L50">        return players.stream().filter(player -&gt; player.getId().equals(playerId)).findFirst().map(Player::getHandCards)</span>
+<span class="fc" id="L51">                .orElse(Collections.emptyList());</span>
+    }
+
+    public List&lt;Card&gt; getCommunityCards() {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (gameState == GameState.PRE_FLOP) {</span>
+<span class="fc" id="L56">            return Collections.emptyList();</span>
+        }
+<span class="fc" id="L58">        return communityCards;</span>
+    }
+
+    public Optional&lt;Player&gt; getCurrentPlayer() {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (gameState == GameState.OPEN) {</span>
+<span class="fc" id="L63">            return Optional.empty();</span>
+        }
+<span class="fc" id="L65">        return Optional.of(currentPlayer);</span>
+    }
+
+    public Map&lt;String, Integer&gt; getBets() {
+<span class="fc" id="L69">        return bets;</span>
+    }
+
+    private void setBets(String playerId) {
+<span class="fc" id="L73">        bets.put(playerId, currentBet);</span>
+<span class="fc" id="L74">    }</span>
+
+    public int getPot() {
+<span class="fc" id="L77">        return pot;</span>
+    }
+
+    public Optional&lt;Player&gt; getWinner() {
+<span class="fc" id="L81">        return Optional.ofNullable(winner);</span>
+    }
+
+    public List&lt;Card&gt; getWinnerHand() {
+<span class="fc" id="L85">        return winner.getHandCards();</span>
+    }
+
+    public void start() {
+        // maybe the players size condition need to be checked before call start
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (players.size() &lt; MIN_PLAYERS_TO_START) {</span>
+<span class="fc" id="L91">            return;</span>
+        }
+
+<span class="fc" id="L94">        deck = deckSupplier.get();</span>
+        //deck.shuffle();
+<span class="fc" id="L96">        gameState = GameState.PRE_FLOP;</span>
+<span class="fc" id="L97">        players.forEach(player -&gt; player.setHandCards(List.of(deck.draw(), deck.draw())));</span>
+<span class="fc" id="L98">        players.forEach(Player::setActive);</span>
+<span class="fc" id="L99">        currentPlayer = players.get(0);</span>
+<span class="fc" id="L100">        winner = currentPlayer;</span>
+<span class="fc" id="L101">    }</span>
+
+    public void addPlayer(String playerId, String playerName) {
+<span class="fc" id="L104">        Player player = new Player(playerId, playerName, START_CASH);</span>
+<span class="fc" id="L105">        players.add(player);</span>
+<span class="fc" id="L106">        System.out.printf(&quot;Player joined the table: %s%n&quot;, playerId);</span>
+<span class="fc" id="L107">    }</span>
+
+    public void performAction(String action, int amount) throws IllegalAmountException, IllegalActionException {
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (gameState == GameState.OPEN) {</span>
+<span class="fc" id="L111">            return;</span>
+        }
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (!currentPlayer.isActive()) {</span>
+<span class="fc" id="L114">            setNextPlayer();</span>
+        }
+
+<span class="fc bfc" id="L117" title="All 5 branches covered.">        switch (action) {</span>
+<span class="fc" id="L118">            case &quot;check&quot; -&gt; handleCheckAction();</span>
+<span class="fc" id="L119">            case &quot;raise&quot; -&gt; handleRaiseAction(amount);</span>
+<span class="fc" id="L120">            case &quot;fold&quot; -&gt; handleFoldAction();</span>
+<span class="fc" id="L121">            case &quot;call&quot; -&gt; handleCallAction();</span>
+<span class="fc" id="L122">            default -&gt; throw new UnsupportedOperationException(&quot;Unsupported action: &quot; + action);</span>
+        }
+<span class="fc" id="L124">        System.out.printf(&quot;Action performed: %s, amount: %d%n&quot;, action, amount);</span>
+<span class="fc" id="L125">        setNextPlayer();</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (gameState != GameState.ENDED) {</span>
+<span class="fc" id="L127">            endOfRound();</span>
+<span class="fc" id="L128">        }else checkTheresWinner();</span>
+<span class="fc" id="L129">    }</span>
+
+    private void handleCheckAction() throws IllegalActionException {
+<span class="fc" id="L132">        validateCheck();</span>
+<span class="fc" id="L133">    }</span>
+
+    private void validateCheck() throws IllegalActionException {
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (currentPlayer.getBet() &lt; currentBet) {</span>
+<span class="fc" id="L137">            throw new IllegalActionException(&quot;Current bet is higher than the player bet, Illegal Check &quot; + currentPlayer.getId());</span>
+        }
+<span class="fc" id="L139">    }</span>
+
+    private void handleRaiseAction(int amount) throws IllegalAmountException {
+<span class="fc" id="L142">        validateRaiseAmount(amount);</span>
+<span class="fc" id="L143">        currentBet = amount;</span>
+<span class="fc" id="L144">        currentPlayer.bet(currentBet - currentPlayer.getBet());</span>
+<span class="fc" id="L145">        setBets(currentPlayer.getId());</span>
+<span class="fc" id="L146">    }</span>
+
+    private void validateRaiseAmount(int amount) throws IllegalAmountException {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (currentBet &gt;= amount) {</span>
+<span class="fc" id="L150">            throw new IllegalAmountException(&quot;Current bet is higher or equal than the raise amount: &quot; + currentPlayer.getId());</span>
+        }
+
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (currentPlayer.getCash() + currentPlayer.getBet() &lt; amount) {</span>
+<span class="fc" id="L154">            throw new IllegalAmountException(&quot;Insufficient funds for raise: &quot; + currentPlayer.getId());</span>
+        }
+
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">            if (player.getBet() + player.getCash() &lt; amount) {</span>
+<span class="fc" id="L159">                throw new IllegalAmountException(&quot;Player &quot; + player.getId() + &quot; only has &quot; + player.getCash() + &quot; left.&quot;);</span>
+            }
+<span class="fc" id="L161">        }</span>
+<span class="fc" id="L162">    }</span>
+
+    private void handleFoldAction() {
+<span class="fc" id="L165">        currentPlayer.setInactive();</span>
+<span class="fc" id="L166">        currentPlayer.clearBet();</span>
+<span class="fc" id="L167">        checkTheresWinner();</span>
+<span class="fc" id="L168">    }</span>
+
+    private void checkTheresWinner() {
+<span class="fc" id="L171">        long activePlayerCount = players.stream().filter(Player::isActive).count();</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (activePlayerCount == 1) {</span>
+<span class="fc" id="L173">            winner = players.stream().filter(Player::isActive).findFirst().orElse(null);</span>
+<span class="fc" id="L174">            winner.setHandCards(Collections.emptyList());</span>
+<span class="fc" id="L175">            endGame();</span>
+        }
+<span class="fc" id="L177">    }</span>
+
+    private void handleCallAction() throws IllegalActionException {
+<span class="fc" id="L180">        validateCall();</span>
+<span class="fc" id="L181">        currentPlayer.bet(currentBet - currentPlayer.getBet());</span>
+<span class="fc" id="L182">        setBets(currentPlayer.getId());</span>
+<span class="fc" id="L183">    }</span>
+
+    private void validateCall() throws IllegalActionException {
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (currentPlayer.getBet() &gt;= currentBet) {</span>
+<span class="fc" id="L187">            throw new IllegalActionException(&quot;Current bet is lower or equal than the player bet, Illegal Check &quot; + currentPlayer.getId());</span>
+        }
+<span class="fc" id="L189">    }</span>
+
+    private void setNextPlayer() {
+<span class="fc" id="L192">        int currentIndex = players.indexOf(currentPlayer);</span>
+<span class="fc" id="L193">        int nextIndex = (currentIndex + 1) % players.size();</span>
+<span class="fc" id="L194">        currentPlayer = players.get(nextIndex);</span>
+<span class="fc" id="L195">    }</span>
+
+    private void endOfRound() {
+<span class="fc bfc" id="L198" title="All 4 branches covered.">        if (players.indexOf(currentPlayer) == 0 &amp;&amp; allPlayersHaveEqualBets()) {</span>
+<span class="pc bpc" id="L199" title="1 of 5 branches missed.">            switch (gameState){</span>
+                case PRE_FLOP :
+<span class="fc" id="L201">                    drawCommunityCards(NUM_FLOP_CARDS);</span>
+<span class="fc" id="L202">                    gameState = GameState.FLOP;</span>
+<span class="fc" id="L203">                    break;</span>
+                case FLOP :
+<span class="fc" id="L205">                    drawCommunityCards(NUM_TURN_CARDS);</span>
+<span class="fc" id="L206">                    gameState = GameState.TURN;</span>
+<span class="fc" id="L207">                    break;</span>
+                case TURN :
+<span class="fc" id="L209">                    drawCommunityCards(NUM_RIVER_CARDS);</span>
+<span class="fc" id="L210">                    gameState = GameState.RIVER;</span>
+<span class="fc" id="L211">                    break;</span>
+                case RIVER :
+<span class="fc" id="L213">                    gameState = GameState.ENDED;</span>
+                    break;
+            }
+<span class="fc" id="L216">            updatePot();</span>
+        }
+<span class="fc" id="L218">    }</span>
+
+    private boolean allPlayersHaveEqualBets() {
+<span class="fc" id="L221">        int firstPlayerBet = players.stream().filter(Player::isActive).findFirst().get().getBet();</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        return players.stream().filter(Player::isActive).allMatch(player -&gt; player.getBet() == firstPlayerBet);</span>
+    }
+
+    private void drawCommunityCards(int numCards) {
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        while (communityCards.size() &lt; numCards) {</span>
+<span class="fc" id="L227">            communityCards.add(deck.draw());</span>
+        }
+<span class="fc" id="L229">    }</span>
+
+    private void updatePot() {
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        for (int value : bets.values()) {</span>
+<span class="fc" id="L233">            pot += value;</span>
+<span class="fc" id="L234">        }</span>
+<span class="fc" id="L235">        players.forEach(Player::clearBet);</span>
+<span class="fc" id="L236">        bets.clear();</span>
+<span class="fc" id="L237">        currentBet = 0;</span>
+<span class="fc" id="L238">    }</span>
+
+    private void endGame() {
+<span class="fc" id="L241">        currentBet = 0;</span>
+<span class="fc" id="L242">        gameState = GameState.ENDED;</span>
+<span class="fc" id="L243">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

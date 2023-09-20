@@ -1,0 +1,42 @@
+{
+  "users": [
+    {
+      "id": "al-capone",
+      "name": "Al Capone"
+    },
+    {
+      "id": "pat-garret",
+      "name": "Pat Garret"
+    },
+    {
+      "id": "wyatt-earp",
+      "name": "Wyatt Earp"
+    },
+    {
+      "id": "doc-holiday",
+      "name": "Doc Holiday"
+    },
+    {
+      "id": "wild-bill",
+      "name": "Wild Bill"
+    },
+    {
+      "id": "stu-ungar",
+      "name": "Stu Ungar"
+    },
+    {
+      "id": "kitty-leroy",
+      "name": "Kitty Leroy"
+    },
+    {
+      "id": "poker-alice",
+      "name": "Poker Alice"
+    },
+    {
+      "id": "madame-moustache",
+      "name": "Madame Moustache"
+    }
+  ],
+  "username": "al-capone",
+  "password": "all-in"
+}

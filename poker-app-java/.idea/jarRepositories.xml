@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteRepositoriesConfiguration">
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="build-releases" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/build-releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="build-3rd-party-releases-cx-commerce-maven" />
+      <option name="name" value="build-3rd-party-releases-cx-commerce-maven" />
+      <option name="url" value="https://common.repositories.cloud.sap/artifactory/build-3rd-party-releases-cx-commerce-maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="snapshots" />
+      <option name="name" value="build-snapshots" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/build-snapshots" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Maven Central repository" />
+      <option name="url" value="https://repo1.maven.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="sfsf-lms-build-release-maven" />
+      <option name="name" value="sfsf-lms-build-release-maven" />
+      <option name="url" value="https://common.repositories.cloud.sap:443/artifactory/sfsf-lms-build-release-maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="deploy.releases" />
+      <option name="name" value="deploy.releases" />
+      <option name="url" value="https://common.repositories.cloud.sap:443/artifactory/deploy.releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="deploy.milestones.xmake" />
+      <option name="name" value="deploy.milestones.xmake" />
+      <option name="url" value="https://common.repositories.cloud.sap:443/artifactory/deploy.milestones.xmake" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven-central-cache" />
+      <option name="name" value="maven-central-cache" />
+      <option name="url" value="https://common.repositories.cloud.sap:443/artifactory/maven-central-cache" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="int-deploy-releases" />
+      <option name="name" value="int-deploy-releases" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/deploy-releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="build-snapshots-cx-commerce-maven" />
+      <option name="name" value="build-snapshots-cx-commerce-maven" />
+      <option name="url" value="https://common.repositories.cloud.sap/artifactory/build-snapshots-cx-commerce-maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jboss.community" />
+      <option name="name" value="JBoss Community repository" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="int-deploy-snapshots" />
+      <option name="name" value="int-deploy-snapshots" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/deploy-snapshots" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jboss-org-nexus-content-repositories-thirdparty-releases" />
+      <option name="name" value="jboss" />
+      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/thirdparty-releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="int-deploy-milestones" />
+      <option name="name" value="int-deploy-milestones" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/deploy-milestones" />
+    </remote-repository>
+  </component>
+</project>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoyalFlush.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">poker</a> &gt; <a href="index.source.html" class="el_package">com.sap.ase.poker.model.hands</a> &gt; <span class="el_source">RoyalFlush.java</span></div><h1>RoyalFlush.java</h1><pre class="source lang-java linenums">package com.sap.ase.poker.model.hands;
+
+import com.sap.ase.poker.model.InvalidHandException;
+import com.sap.ase.poker.model.deck.Card;
+import com.sap.ase.poker.model.deck.Kind;
+import com.sap.ase.poker.model.deck.Suit;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class RoyalFlush extends Hand {
+    private static final int ROYAL_FLUSH_RANK = 10;
+
+    public RoyalFlush(List&lt;Card&gt; cards) {
+<span class="fc" id="L15">        super(cards);</span>
+<span class="fc" id="L16">    }</span>
+
+    @Override
+    public int getRank() {
+<span class="fc" id="L20">        return ROYAL_FLUSH_RANK;</span>
+    }
+
+    @Override
+    protected List&lt;Card&gt; findRelevantCards(List&lt;Card&gt; cards) {
+        StraightFlush straightFlush;
+        try {
+<span class="fc" id="L27">            straightFlush = new StraightFlush(cards);</span>
+<span class="fc" id="L28">        } catch (InvalidHandException exception) {</span>
+<span class="fc" id="L29">            throw new InvalidHandException(&quot;No royal flush present&quot;);</span>
+<span class="fc" id="L30">        }</span>
+<span class="fc" id="L31">        List&lt;Card&gt; relevantCards = straightFlush.getRelevantCards();</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (cardsContainOnlyRoyalKinds(relevantCards)) {</span>
+<span class="fc" id="L33">            return relevantCards;</span>
+        }
+<span class="fc" id="L35">        throw new InvalidHandException(&quot;No royal flush present&quot;);</span>
+    }
+
+    private boolean cardsContainOnlyRoyalKinds(List&lt;Card&gt; relevantCards) {
+<span class="fc" id="L39">        Suit suit = relevantCards.get(0).getSuit();</span>
+
+<span class="fc" id="L41">        return relevantCards.containsAll(Arrays.asList(</span>
+                new Card(Kind.ACE, suit),
+                new Card(Kind.KING, suit),
+                new Card(Kind.QUEEN, suit),
+                new Card(Kind.JACK, suit),
+                new Card(Kind.TEN, suit)
+        ));
+    }
+
+    @Override
+    protected int compareRelevantCards(Hand hand) {
+<span class="fc" id="L52">        return 0;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
