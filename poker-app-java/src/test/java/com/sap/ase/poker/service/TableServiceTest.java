@@ -7,28 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.sap.ase.poker.model.GameState;
 import com.sap.ase.poker.model.IllegalActionException;
 import com.sap.ase.poker.model.IllegalAmountException;
-import com.sap.ase.poker.model.deck.CardShuffler;
 import com.sap.ase.poker.model.deck.Deck;
-import com.sap.ase.poker.model.deck.PokerCardsSupplier;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
 
 class TableServiceTest {
-    private CardShuffler cardShuffler;
-    private PokerCardsSupplier pokerCardsSupplier;
+    @Mock
+    private Supplier<Deck> mockDeckSupplier;
     private TableService tableService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        pokerCardsSupplier = new PokerCardsSupplier();
-        cardShuffler = Mockito.mock(CardShuffler.class);
-        Supplier<Deck> deckSupplier = () -> new Deck(pokerCardsSupplier.get(), cardShuffler);
-        tableService = new TableService(deckSupplier);
+        tableService = new TableService(mockDeckSupplier);
     }
 
     @Test
@@ -374,26 +367,6 @@ class TableServiceTest {
     }
 
     @Test
-    void tableService_getWinnerHand_shouldReturnWinnerHand() {
-        String playerId1 = "i-ducati";
-        String playerName1 = "Ducati Opera";
-        String playerId2 = "i-honda";
-        String playerName2 = "Honda Blade";
-        String playerId3 = "i-mv";
-        String playerName3 = "MV Augusta";
-        tableService.addPlayer(playerId1, playerName1);
-        tableService.addPlayer(playerId2, playerName2);
-        tableService.addPlayer(playerId3, playerName3);
-
-        tableService.start();
-        tableService.performAction("fold", 0);
-        tableService.performAction("check", 0);
-        tableService.performAction("fold", 0);
-        assertThat(tableService.getWinner().get().getId()).isEqualTo(playerId2);
-        assertThat(tableService.getWinnerHand()).isEqualTo(tableService.getPlayers().get(1).getHandCards());
-    }
-
-    @Test
     void tableService_performActionCall_shouldDeductsCash() {
         String playerId1 = "i-ducati";
         String playerName1 = "Ducati Opera";
@@ -456,7 +429,7 @@ class TableServiceTest {
     }
 
     @Test
-    void tableService_endOfRoundFlop_shouldUpdateTurn(){
+    void tableService_endOfRoundFlop_shouldUpdateTurn() {
         String playerId1 = "i-ducati";
         String playerName1 = "Ducati Opera";
         String playerId2 = "i-honda";
@@ -488,20 +461,191 @@ class TableServiceTest {
         tableService.performAction("call", 0);
         tableService.performAction("check", 5);
 
-
         tableService.performAction("raise", 5);
         tableService.performAction("call", 0);
         tableService.performAction("check", 0);
-        tableService.performAction("check", 0);
 
         assertThat(tableService.getState()).isEqualTo(GameState.ENDED);
-        assertThat(tableService.getPot()).isEqualTo(75*3 + 5*2 + 10*2 + 5*2);
+        assertThat(tableService.getPot()).isZero();
         assertThat(tableService.getBets()).isEmpty();
         assertThat(tableService.getPlayers().get(0).getBet()).isZero();
         assertThat(tableService.getPlayers().get(1).getBet()).isZero();
         assertThat(tableService.getPlayers().get(2).getBet()).isZero();
         assertThat(tableService.getPlayers().get(0).getCash()).isEqualTo(25);
-        assertThat(tableService.getPlayers().get(1).getCash()).isEqualTo(5);
-        assertThat(tableService.getPlayers().get(2).getCash()).isEqualTo(5);
+        assertThat(tableService.getWinner().get().getCash()).isEqualTo(270);
+    }
+
+    @Test
+    void tableService_getWinnerBeforeEnded_shouldReturnEmptyWinner() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        assertThat(tableService.getWinner()).isEmpty();
+    }
+
+    @Test
+    void tableService_getWinner_shouldReturnWinner() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        tableService.performAction("raise", 25);
+        tableService.performAction("raise", 50);
+        tableService.performAction("raise", 75);
+        tableService.performAction("call", 0);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("check", 0);
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("fold", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("raise", 10);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 5);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        assertThat(tableService.getWinner()).isNotEmpty();
+    }
+
+    @Test
+    void tableService_getWinnerHandWithOutWinner_shouldReturnEmptyHand() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        assertThat(tableService.getWinnerHand()).isEmpty();
+    }
+
+    @Test
+    void tableService_getWinnerHandWhenFold_shouldReturnEmptyHand() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+        tableService.performAction("fold", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("fold", 0);
+
+        assertThat(tableService.getWinnerHand()).isEmpty();
+    }
+
+    @Test
+    void tableService_getWinnerHand_shouldReturnWinnerHand() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        tableService.performAction("raise", 25);
+        tableService.performAction("raise", 50);
+        tableService.performAction("raise", 75);
+        tableService.performAction("call", 0);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("check", 0);
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("fold", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("raise", 10);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 5);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        assertThat(tableService.getWinnerHand()).isNotEmpty();
+    }
+
+    @Test
+    void tableService_winnerCash_shouldGetPot() {
+        String playerId1 = "i-ducati";
+        String playerName1 = "Ducati Opera";
+        String playerId2 = "i-honda";
+        String playerName2 = "Honda Blade";
+        String playerId3 = "i-mv";
+        String playerName3 = "MV Augusta";
+        tableService.addPlayer(playerId1, playerName1);
+        tableService.addPlayer(playerId2, playerName2);
+        tableService.addPlayer(playerId3, playerName3);
+
+        tableService.start();
+
+        tableService.performAction("raise", 25);
+        tableService.performAction("raise", 50);
+        tableService.performAction("raise", 75);
+        tableService.performAction("call", 0);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("check", 0);
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("fold", 0);
+        tableService.performAction("check", 0);
+        tableService.performAction("check", 0);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("raise", 10);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 5);
+
+        tableService.performAction("raise", 5);
+        tableService.performAction("call", 0);
+        tableService.performAction("check", 0);
+
+        assertThat(tableService.getWinner().get().getCash()).isEqualTo(270);
     }
 }

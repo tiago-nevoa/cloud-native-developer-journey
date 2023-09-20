@@ -74,5 +74,7 @@ class DeveloperTests {
 			Assumptions.assumeTrue(false, "Developer instance initialization failed");
 			return;
 		}
+		
 	}
+
 }
