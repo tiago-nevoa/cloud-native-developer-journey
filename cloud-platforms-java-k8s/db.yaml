@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fortune-cookies-db
+spec:
+  selector:
+    matchLabels:
+      app: fortune-cookies-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fortune-cookies-db
+    spec:
+      containers:
+        - name: app
+          image: postgres:14-alpine
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fortune-cookies-db
+spec:
+  selector:
+    app: fortune-cookies-db
+  ports:
+    - name: db
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
