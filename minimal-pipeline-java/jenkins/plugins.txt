@@ -1,0 +1,5 @@
+git
+locale
+kubernetes-cli
+workflow-aggregator
+pipeline-stage-view
