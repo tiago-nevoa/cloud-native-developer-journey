@@ -1,0 +1,13 @@
+applications:
+  - name: fortune-cookies
+    memory: 800MB
+    path: target/fortune-cookies.jar
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git
+    env:
+      # see https://github.tools.sap/cloud-curriculum/materials/blob/main/cloud-platforms/cloud-foundry/java-memory-allocation.md
+      JBP_CONFIG_OPEN_JDK_JRE: '{ memory_calculator: { stack_threads: 200 },jre: { version: 17.+ } }'
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION '{enabled: false}'
+      MALLOC_ARENA_MAX: 4
+    services:
+      - fortune-cookies-db
