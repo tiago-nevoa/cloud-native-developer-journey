@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fortune-cookies
+spec:
+  selector:
+    matchLabels:
+      app: fortune-cookies
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fortune-cookies
+    spec:
+      containers:
+        - name: app
+          image: cc-ms-k8s-training.common.repositories.cloud.sap/fortune-cookies-i585382:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://fortune-cookies-db/postgres"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_JPA_DATABASE-PLATFORM_HIBERNATE_DIALECT
+              value: "PostgreSQLDialect"
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fortune-cookies
+spec:
+  selector:
+    app: fortune-cookies
+  ports:
+    - name: fortune-cookies
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: istio
+  name: fortune-cookies
+spec:
+  rules:
+    - host: fortune-cookies.c-9cd3170.kyma.ondemand.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: fortune-cookies
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - fortune-cookies.c-9cd3170.kyma.ondemand.com
+      secretName: kyma-gateway-certs
