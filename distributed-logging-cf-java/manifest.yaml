@@ -1,0 +1,24 @@
+applications:
+  - name: users
+    memory: 800MB
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git
+    services:
+      - app-logs
+    path: users/target/users.jar
+    routes:
+      - route: users-((identifier)).((domain))
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ memory_calculator: { stack_threads: 200 },jre: { version: 17.+ } }'
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+  - name: greetings
+    memory: 800MB
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git
+    path: greetings/target/greetings.jar
+    routes:
+      - route: greetings-((identifier)).((domain))
+    env:
+      USERS_URL: https://users-((identifier)).((domain))/api/v1/users/
+      JBP_CONFIG_OPEN_JDK_JRE: '{ memory_calculator: { stack_threads: 200 },jre: { version: 17.+ } }'
+      JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'

@@ -1,0 +1,6 @@
+com\sap\cc\greeting\GreetingService.class
+com\sap\cc\greeting\UserServiceClient.class
+com\sap\cc\greeting\User.class
+com\sap\cc\greeting\FigletFontConverter.class
+com\sap\cc\greeting\GreetingController.class
+com\sap\cc\greeting\SpringBootGreetingApplication.class
