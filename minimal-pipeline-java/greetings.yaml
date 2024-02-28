@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJjYy1tcy1rOHMtdHJhaW5pbmcuY29tbW9uLnJlcG9zaXRvcmllcy5jbG91ZC5zYXAiOiB7CgkJCSJhdXRoIjogIlkyeGhkV1JsT2pseFVqVm9ZbWh0TjBSNmR6WkNUbHBqVWtaMiIKCQl9Cgl9LAoJInN0YWNrT3JjaGVzdHJhdG9yIjogInN3YXJtIgp9
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greetings
+spec:
+  type: ClusterIP
+  selector:
+    app: greetings
+  ports:
+    - name: app
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greetings
+spec:
+  selector:
+    matchLabels:
+      app: greetings
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: greetings
+    spec:
+      containers:
+        - name: app
+          image: cc-ms-k8s-training.common.repositories.cloud.sap/cd-<YOUR c/d/i-number>
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: istio
+  name: greetings
+spec:
+  rules:
+    - host: greetings.<SUBDOMAIN>.kyma.ondemand.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: greetings
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - greetings.<SUBDOMAIN>.kyma.ondemand.com
+      secretName: kyma-gateway-certs

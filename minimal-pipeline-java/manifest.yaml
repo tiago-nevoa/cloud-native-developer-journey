@@ -1,0 +1,11 @@
+applications:
+  - name: greetings
+    memory: 800MB
+    path: target/greetings.jar
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ memory_calculator: { stack_threads: 200 }, jre: { version: 17.+ }}'
+      MALLOC_ARENA_MAX: 4
+    routes:
+      - route: greetings-i585382.cfapps.eu12.hana.ondemand.com

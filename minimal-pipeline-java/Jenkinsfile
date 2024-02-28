@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                checkout scm
+            }
+        }
+        stage('Test') {
+             steps {
+                sh 'mvn verify'
+             }
+        }
+        stage('Deployment') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'cf-user', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'cf login -a https://api.cf.eu12.hana.ondemand.com -u $USERNAME -p $PASSWORD -o  dev-learning-trial -s i585382'
+                }
+                sh 'cf push greetings -f manifest.yaml'
+            }
+
+        }
+    }
+}
